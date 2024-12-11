@@ -1,6 +1,5 @@
 function asyncFindIndex(array, asyncCallback, finalCallback) {
-    let completed = 0;
-    let found = false;
+    let foundIndex = -1;
 
     for (let i = 0; i < array.length; i++) {
         asyncCallback(array[i], (err, result) => {
@@ -9,21 +8,16 @@ function asyncFindIndex(array, asyncCallback, finalCallback) {
     }
 
     function handleResult(err, result, index) {
-        if (found) return;
-
         if (err) {
-            found = true;
             return finalCallback(err);
         }
 
         if (result) {
-            found = true;
+            foundIndex = index;
             return finalCallback(null, index);
         }
 
-        completed++;
-
-        if (completed === array.length && !found) {
+        if (index === array.length - 1 && foundIndex === -1) {
             return finalCallback(null, -1);
         }
     }
