@@ -1,29 +1,31 @@
 function asyncFindIndex(array, asyncCallback, finalCallback) {
-    let index = -1;
     let completed = 0;
     let found = false;
 
     for (let i = 0; i < array.length; i++) {
         asyncCallback(array[i], (err, result) => {
-            if (found) return;
-
-            if (err) {
-                found = true;
-                return finalCallback(err);
-            }
-
-            if (result) {
-                found = true;
-                index = i;
-                return finalCallback(null, index);
-            }
-
-            completed++;
-
-            if (completed === array.length && !found) {
-                return finalCallback(null, -1);
-            }
+            handleResult(err, result, i);
         });
+    }
+
+    function handleResult(err, result, index) {
+        if (found) return;
+
+        if (err) {
+            found = true;
+            return finalCallback(err);
+        }
+
+        if (result) {
+            found = true;
+            return finalCallback(null, index);
+        }
+
+        completed++;
+
+        if (completed === array.length && !found) {
+            return finalCallback(null, -1);
+        }
     }
 }
 
