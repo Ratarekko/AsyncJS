@@ -1,18 +1,18 @@
-function asyncFindIndexPromise(array, asyncPredicate) {
+function asyncFindIndexPromise(array, searchValue) {
     return new Promise((resolve, reject) => {
         let foundIndex = -1;
 
         for (let i = 0; i < array.length; i++) {
             new Promise(resolve => {
-                asyncPredicate(array[i], (err, result) => resolve({ err, result, index: i }));
+                setTimeout(() => {
+                    resolve(array[i] === searchValue);
+                }, 1500);
             })
-                .then(({ err, result, index }) => {
-                    if (err) {
-                        reject(err);
-                    } else if (result) {
-                        foundIndex = index;
+                .then(result => {
+                    if (result) {
+                        foundIndex = i;
                         resolve(foundIndex);
-                    } else if (index === array.length - 1) {
+                    } else if (i === array.length - 1) {
                         resolve(-1);
                     }
                 })
@@ -41,3 +41,11 @@ async function example() {
 }
 
 example();
+
+asyncFindIndexPromise(array, searchValue)
+    .then(result => {
+        console.log("Result:", result);
+    })
+    .catch(err => {
+        console.log(`Caught error: ${err.message}`);
+    });
