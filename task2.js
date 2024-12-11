@@ -25,19 +25,8 @@ const array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 const searchValue = 8;
 
 async function example() {
-    try {
-        const index = await asyncFindIndexPromise(array, (item) =>
-            new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(item === searchValue);
-                }, 500);
-            })
-        );
-
-        console.log("Result:", index);
-    } catch (err) {
-        console.log(`Caught error: ${err.message}`);
-    }
+    const result = await asyncFindIndexPromise(array, searchValue);
+    console.log("Result:", result);
 }
 
 example();

@@ -34,10 +34,10 @@ asyncFindIndex(
         }, 1500);
     },
     (err, result) => {
-        if (err) {
-            console.log("err", err);
+        if (result) {
+            console.log("Result:", result);
         } else {
-            console.log("res", result);
+            console.log(`Caught error: ${err.message}`);
         }
     }
 );
