@@ -1,30 +1,22 @@
 function asyncFindIndexPromise(array, asyncPredicate) {
     return new Promise((resolve, reject) => {
-        let completed = 0;
-        let found = false;
+        let foundIndex = -1;
 
         for (let i = 0; i < array.length; i++) {
-            asyncPredicate(array[i])
-                .then((result) => {
-                    if (found) return;
-
-                    if (result) {
-                        found = true;
-                        return resolve(i);
-                    }
-
-                    completed++;
-
-                    if (completed === array.length && !found) {
+            new Promise(resolve => {
+                asyncPredicate(array[i], (err, result) => resolve({ err, result, index: i }));
+            })
+                .then(({ err, result, index }) => {
+                    if (err) {
+                        reject(err);
+                    } else if (result) {
+                        foundIndex = index;
+                        resolve(foundIndex);
+                    } else if (index === array.length - 1) {
                         resolve(-1);
                     }
                 })
-                .catch((err) => {
-                    if (!found) {
-                        found = true;
-                        reject(err);
-                    }
-                });
+                .catch(reject);
         }
     });
 }
