@@ -1,21 +1,27 @@
-async function asyncFindIndexPromise(array, searchValue, signal) {
-    for (let i = 0; i < array.length; i++) {
-        if (signal.aborted) {
-            throw new Error('Operation aborted');
+function asyncFindIndex(array, searchValue, signal) {
+    return new Promise((resolve, reject) => {
+
+        if (!Array.isArray(array)) {
+            return reject(new TypeError('First argument must be an array'));
+        }
+        if (typeof searchValue !== 'number') {
+            return reject(new TypeError('Second argument must be a number'));
         }
 
-        const result = await new Promise(resolve => {
+        for (let i = 0; i < array.length; i++) {
             setTimeout(() => {
-                resolve(array[i] === searchValue);
-            }, 200);
-        });
-
-        if (result) {
-            return i;
+                if (signal.aborted) {
+                    return reject (new Error('Operation aborted'))
+                }
+                if (array[i] === searchValue) {
+                    resolve(i);
+                }
+                if (i === array.length - 1) {
+                    resolve(-1);
+                }
+            }, 500);
         }
-    }
-
-    throw new Error('Element not found');
+    });
 }
 
 const array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
@@ -28,7 +34,7 @@ async function example() {
     setTimeout(() => controller.abort(), 1500);
 
     try {
-        const index = await asyncFindIndexPromise(array, searchValue, signal);
+        const index = await asyncFindIndex(array, searchValue, signal);
         console.log("Result:", index);
     } catch (err) {
         console.log(`Caught error: ${err.message}`);
