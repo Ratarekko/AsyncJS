@@ -1,6 +1,5 @@
 function asyncFindIndex(array, searchValue) {
     return new Promise((resolve, reject) => {
-        let foundIndex = -1;
 
         if (!Array.isArray(array)) {
             return reject(new TypeError('First argument must be an array'));
@@ -12,8 +11,7 @@ function asyncFindIndex(array, searchValue) {
         for (let i = 0; i < array.length; i++) {
             setTimeout(() => {
                 if (array[i] === searchValue) {
-                    foundIndex = i;
-                    resolve(foundIndex);
+                    resolve(i);
                 }
                 if (i === array.length - 1) {
                     resolve(-1);
