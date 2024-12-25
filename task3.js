@@ -2,13 +2,6 @@ function asyncFindIndex(array, signal, asyncEvaluate) {
     return new Promise((resolve, reject) => {
         let isDone = false;
 
-        if (!Array.isArray(array)) {
-            return reject(new TypeError('First argument must be an array'));
-        }
-        if (typeof searchValue !== 'number') {
-            return reject(new TypeError('Second argument must be a number'));
-        }
-
         for (let i = 0; i < array.length; i++) {
             asyncEvaluate(array[i])
                 .then((result) => {
