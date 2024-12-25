@@ -1,5 +1,6 @@
-function asyncFindIndex(array, searchValue) {
+function asyncFindIndex(array, asyncEvaluate) {
     return new Promise((resolve, reject) => {
+        let isDone = false;
 
         if (!Array.isArray(array)) {
             return reject(new TypeError('First argument must be an array'));
@@ -9,14 +10,24 @@ function asyncFindIndex(array, searchValue) {
         }
 
         for (let i = 0; i < array.length; i++) {
-            setTimeout(() => {
-                if (array[i] === searchValue) {
-                    resolve(i);
-                }
-                if (i === array.length - 1) {
-                    resolve(-1);
-                }
-            }, 1500);
+            asyncEvaluate(array[i])
+                .then((result) => {
+                    if (isDone) return;
+
+                    if (result) {
+                        isDone = true;
+                        resolve(i);
+                    }
+                    if (i === array.length - 1 && !isDone) {
+                        resolve(-1);
+                    }
+                })
+                .catch((err) => {
+                    if (!isDone) {
+                        isDone = true;
+                        reject(err);
+                    }
+                });
         }
     });
 }
@@ -26,7 +37,9 @@ const searchValue = 8;
 
 async function example() {
     try {
-        const result = await asyncFindIndex(array, searchValue);
+        const result = await asyncFindIndex(array, (item) => {
+            return Promise.resolve(item === searchValue);
+        });
         console.log("Result:", result);
     } catch (err) {
         console.log(`Caught error: ${err.message}`);
@@ -35,10 +48,14 @@ async function example() {
 
 example();
 
-asyncFindIndex(array, searchValue)
-    .then(result => {
+asyncFindIndex(array, (item) => {
+    return new Promise((resolve) => {
+        resolve(item === searchValue);
+    });
+})
+    .then((result) => {
         console.log("Result:", result);
     })
-    .catch(err => {
+    .catch((err) => {
         console.log(`Caught error: ${err.message}`);
     });
