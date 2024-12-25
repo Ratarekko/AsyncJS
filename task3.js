@@ -1,5 +1,6 @@
-function asyncFindIndex(array, searchValue, signal) {
+function asyncFindIndex(array, signal, asyncEvaluate) {
     return new Promise((resolve, reject) => {
+        let isDone = false;
 
         if (!Array.isArray(array)) {
             return reject(new TypeError('First argument must be an array'));
@@ -9,17 +10,28 @@ function asyncFindIndex(array, searchValue, signal) {
         }
 
         for (let i = 0; i < array.length; i++) {
-            setTimeout(() => {
-                if (signal.aborted) {
-                    return reject (new Error('Operation aborted'))
-                }
-                if (array[i] === searchValue) {
-                    resolve(i);
-                }
-                if (i === array.length - 1) {
-                    resolve(-1);
-                }
-            }, 500);
+            asyncEvaluate(array[i])
+                .then((result) => {
+                    if (isDone) return;
+
+                    if (signal.aborted) {
+                        isDone = true;
+                        return reject (new Error('Operation aborted'))
+                    }
+                    if (result) {
+                        isDone = true;
+                        resolve(i);
+                    }
+                    if (i === array.length - 1 && !isDone) {
+                        resolve(-1);
+                    }
+                })
+                .catch((err) => {
+                    if (!isDone) {
+                        isDone = true;
+                        reject(err);
+                    }
+                });
         }
     });
 }
@@ -31,11 +43,19 @@ async function example() {
     const controller = new AbortController();
     const signal = controller.signal;
 
-    setTimeout(() => controller.abort(), 1500);
+    setTimeout(() => controller.abort(), 1000);
+    const sleep = (ms) => new Promise(resolve => {
+        setTimeout(resolve, ms)
+    });
+    const delay = Math.floor(Math.random() * 1000) + 500;
+    console.log('Delay:', delay)
 
     try {
-        const index = await asyncFindIndex(array, searchValue, signal);
-        console.log("Result:", index);
+        await sleep(delay)
+        const result = await asyncFindIndex(array, signal, (item) => {
+            return Promise.resolve(item === searchValue)
+        });
+        console.log("Result:", result);
     } catch (err) {
         console.log(`Caught error: ${err.message}`);
     }
