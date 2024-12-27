@@ -15,7 +15,7 @@ function asyncFindIndex(array, signal, asyncEvaluate) {
                         isDone = true;
                         resolve(i);
                     }
-                    if (i === array.length - 1 && !isDone) {
+                    if (i === array.length - 1) {
                         resolve(-1);
                     }
                 })
